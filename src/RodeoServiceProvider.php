@@ -32,6 +32,10 @@ class RodeoServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../dist' => public_path('vendor/rodeo'),
             ], 'rodeo-assets');
+
+            $this->commands([
+                \RodeoPHP\Console\ResourceMakeCommand::class,
+            ]);
         }
     }
 

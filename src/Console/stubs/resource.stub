@@ -1,0 +1,28 @@
+<?php
+
+namespace {{ namespace }};
+
+use RodeoPHP\Fields\Text;
+use RodeoPHP\Forms\Form;
+use RodeoPHP\Resource;
+use RodeoPHP\Tables\Columns\TextColumn;
+use RodeoPHP\Tables\Table;
+
+class {{ class }} extends Resource
+{
+    public static string $model = {{ model }}::class;
+
+    public static function form(Form $form): Form
+    {
+        return $form->schema([
+            Text::make('name')->required(),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table->columns([
+            TextColumn::make('name')->sortable()->searchable(),
+        ]);
+    }
+}
