@@ -1,0 +1,48 @@
+{
+    "name": "rodeophp/rodeophp",
+    "description": "The open-source admin & content framework for Laravel. A friendly Filament alternative, built for Inertia and Vue.",
+    "keywords": ["laravel", "admin", "cmf", "filament-alternative", "inertia", "vue", "panel", "rodeophp"],
+    "homepage": "https://rodeophp.com",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        { "name": "RodeoPHP", "homepage": "https://rodeophp.com" }
+    ],
+    "require": {
+        "php": "^8.4",
+        "illuminate/contracts": "^13.0",
+        "illuminate/support": "^13.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "RodeoPHP\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RodeoPHP\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RodeoPHP\\RodeoServiceProvider"
+            ],
+            "aliases": {
+                "Rodeo": "RodeoPHP\\Facades\\Rodeo"
+            }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        },
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
