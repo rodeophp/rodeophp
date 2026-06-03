@@ -35,6 +35,8 @@ class RodeoServiceProvider extends ServiceProvider
 
             $this->commands([
                 \RodeoPHP\Console\ResourceMakeCommand::class,
+                \RodeoPHP\Console\InstallCommand::class,
+                \RodeoPHP\Console\UpgradeCommand::class,
             ]);
         }
     }
