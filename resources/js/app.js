@@ -8,7 +8,21 @@ const pages = import.meta.glob('./Pages/**/*.vue', { eager: true });
 createInertiaApp({
     resolve: (name) => pages[`./Pages/${name}.vue`],
     setup({ el, App, props, plugin }) {
+        warnOnStaleAssets(props.initialPage?.props?.rodeo?.version);
+
         createApp({ render: () => h(App, props) }).use(plugin).mount(el);
     },
     progress: { color: '#d9501f', showSpinner: false },
 });
+
+// Published assets can fall behind the installed composer package; nudge
+// the developer toward `php artisan rodeo:upgrade` when versions diverge.
+function warnOnStaleAssets(serverVersion) {
+    if (typeof __RODEO_VERSION__ === 'undefined' || !serverVersion) return;
+
+    if (serverVersion !== __RODEO_VERSION__) {
+        console.warn(
+            `[RodeoPHP] Published panel assets are v${__RODEO_VERSION__} but the installed package is v${serverVersion}. Run: php artisan rodeo:upgrade`,
+        );
+    }
+}

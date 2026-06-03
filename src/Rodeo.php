@@ -10,7 +10,7 @@ use RodeoPHP\Support\ResourceDiscovery;
 
 class Rodeo
 {
-    public const VERSION = '0.1.0-dev';
+    public const VERSION = '0.1.0';
 
     /** @var array<int, class-string<resource>> */
     protected array $registered = [];
