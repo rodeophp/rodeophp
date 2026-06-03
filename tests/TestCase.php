@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace RodeoPHP\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Workbench\App\Models\User;
@@ -19,6 +20,8 @@ abstract class TestCase extends Orchestra
         parent::setUp();
 
         $this->app->make(\RodeoPHP\Rodeo::class)->register([\Workbench\App\Rodeo\HorseResource::class]);
+
+        Gate::guessPolicyNamesUsing(fn () => null);
     }
 
     protected function defineEnvironment($app): void
