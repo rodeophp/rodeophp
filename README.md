@@ -1,11 +1,11 @@
 <p align="center">
   <strong>RodeoPHP</strong><br>
-  <em>Saddle up cowboy, there's a new CMF in town.</em>
+  <em>Saddle up cowboy, there's a new sheriff in town.</em>
 </p>
 
 ---
 
-**RodeoPHP** is the open-source admin and content framework for Laravel, built the modern way for **Inertia and
+**RodeoPHP** is the open-source admin panel framework for Laravel, built the modern way for **Inertia and
 Vue**. Round up your Eloquent models into polished resource panels, with form and table builders, roles and access,
 plugins, and multi-tenancy.
 

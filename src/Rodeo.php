@@ -25,7 +25,7 @@ class Rodeo
 
     public function greeting(): string
     {
-        return "Saddle up, cowboy. There's a new CMF in town.";
+        return "Saddle up, cowboy. There's a new sheriff in town.";
     }
 
     /** @param array<int, class-string<resource>> $resources */
