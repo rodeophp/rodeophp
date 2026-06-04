@@ -13,7 +13,7 @@ it('renders the create form payload', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('Resources/Create')
             ->where('resource.uriKey', 'horses')
-            ->count('fields', 4)
+            ->count('fields', 7)
             ->where('fields.0.component', 'text-field')
             ->where('fields.0.name', 'name')
         );

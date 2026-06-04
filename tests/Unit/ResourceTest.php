@@ -26,3 +26,7 @@ it('allows all abilities when the model has no policy', function () {
     expect(HorseResource::allows('viewAny'))->toBeTrue()
         ->and(HorseResource::allows('create'))->toBeTrue();
 });
+
+it('eager loads the declared relations on the base query', function () {
+    expect(HorseResource::query(request())->getEagerLoads())->toHaveKey('rider');
+});
