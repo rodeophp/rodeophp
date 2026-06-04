@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SaddlePHP\Fields;
 
+use Closure;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo as BelongsToRelation;
 use Illuminate\Support\Str;
@@ -21,6 +24,10 @@ class BelongsTo extends Field
     protected ?string $titleAttribute = null;
 
     protected int $limit = 100;
+
+    protected bool $searchable = false;
+
+    protected ?Closure $modifyOptionsQuery = null;
 
     /** @var class-string<Model>|null */
     protected ?string $relatedModel = null;
@@ -48,6 +55,53 @@ class BelongsTo extends Field
         $this->limit = $limit;
 
         return $this;
+    }
+
+    /**
+     * Hook to scope the related options query (tenancy, visibility). Runs after
+     * the base ordering and limit, so added orderBy calls become secondary sorts.
+     */
+    public function modifyOptionsQuery(Closure $callback): static
+    {
+        $this->modifyOptionsQuery = $callback;
+
+        return $this;
+    }
+
+    public function searchable(bool $searchable = true): static
+    {
+        $this->searchable = $searchable;
+        $this->component = $searchable ? 'search-select-field' : 'select-field';
+
+        return $this;
+    }
+
+    public function toArray(?Model $record = null): array
+    {
+        $payload = parent::toArray($record);
+
+        if ($this->searchable) {
+            $payload['async'] = true;
+            $payload['options'] = $record !== null ? $this->currentOption($record) : [];
+        }
+
+        return $payload;
+    }
+
+    /** @return array<int, array{value: mixed, label: string}> */
+    protected function currentOption(Model $record): array
+    {
+        $key = data_get($record, $this->name);
+
+        if ($key === null || $this->relatedModel === null) {
+            return [];
+        }
+
+        // Deliberately bypasses modifyOptionsQuery: a persisted FK must keep
+        // rendering its label even when the row falls outside the hook's scope.
+        $related = $this->relatedModel::query()->whereKey($key)->first();
+
+        return $related === null ? [] : $this->mapOptions(new Collection([$related]), $this->resolveTitleAttribute());
     }
 
     public function bound(Model $prototype): void
@@ -84,7 +138,26 @@ class BelongsTo extends Field
 
     protected function meta(): array
     {
-        return ['options' => $this->options()];
+        return $this->searchable ? [] : ['options' => $this->options()];
+    }
+
+    /** @return array<int, array{value: mixed, label: string}> */
+    public function searchOptions(string $search = ''): array
+    {
+        if ($this->relatedModel === null) {
+            return [];
+        }
+
+        $title = $this->resolveTitleAttribute();
+        $query = $this->optionsQuery($title);
+
+        if ($search !== '') {
+            $title !== null
+                ? $query->where($title, 'like', "%{$search}%")
+                : $query->whereKey($search);
+        }
+
+        return $this->mapOptions($query->get(), $title);
     }
 
     /** @return array<int, array{value: mixed, label: string}> */
@@ -95,12 +168,27 @@ class BelongsTo extends Field
         }
 
         $title = $this->resolveTitleAttribute();
-        $orderBy = $title ?? $this->relatedKeyName;
 
-        return $this->relatedModel::query()
-            ->orderBy($orderBy)
-            ->limit($this->limit)
-            ->get()
+        return $this->mapOptions($this->optionsQuery($title)->get(), $title);
+    }
+
+    protected function optionsQuery(?string $title): Builder
+    {
+        $query = $this->relatedModel::query()
+            ->orderBy($title ?? $this->relatedKeyName)
+            ->limit($this->limit);
+
+        if ($this->modifyOptionsQuery !== null) {
+            $query = ($this->modifyOptionsQuery)($query) ?? $query;
+        }
+
+        return $query;
+    }
+
+    /** @return array<int, array{value: mixed, label: string}> */
+    protected function mapOptions(Collection $records, ?string $title): array
+    {
+        return $records
             ->map(fn (Model $record) => [
                 'value' => $record->getKey(),
                 'label' => $title !== null

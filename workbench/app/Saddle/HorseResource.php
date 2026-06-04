@@ -16,6 +16,8 @@ use SaddlePHP\Resource;
 use SaddlePHP\Tables\Columns\BadgeColumn;
 use SaddlePHP\Tables\Columns\BooleanColumn;
 use SaddlePHP\Tables\Columns\TextColumn;
+use SaddlePHP\Tables\Filters\BooleanFilter;
+use SaddlePHP\Tables\Filters\SelectFilter;
 use SaddlePHP\Tables\Table;
 use Workbench\App\Models\Horse;
 
@@ -40,7 +42,7 @@ class HorseResource extends Resource
             ]),
             Textarea::make('notes')->rows(3),
             Toggle::make('is_saddled'),
-            BelongsTo::make('rider'),
+            BelongsTo::make('rider')->searchable(),
             Number::make('age')->integer()->min(0)->max(50),
             Date::make('foaled_on'),
         ]);
@@ -58,6 +60,13 @@ class HorseResource extends Resource
             BooleanColumn::make('is_saddled'),
             TextColumn::make('rider.name')->label('Rider'),
             TextColumn::make('created_at')->date('M j, Y')->sortable(),
+        ])->filters([
+            SelectFilter::make('breed')->options([
+                'quarter' => 'Quarter Horse',
+                'mustang' => 'Mustang',
+                'appaloosa' => 'Appaloosa',
+            ]),
+            BooleanFilter::make('is_saddled'),
         ]);
     }
 }

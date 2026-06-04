@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SaddlePHP\Tables;
 
 use SaddlePHP\Tables\Columns\Column;
+use SaddlePHP\Tables\Filters\Filter;
 
 class Table
 {
@@ -46,5 +47,28 @@ class Table
     public function toInertia(): array
     {
         return collect($this->columns)->map->toArray()->values()->all();
+    }
+
+    /** @var array<int, Filter> */
+    protected array $filters = [];
+
+    /** @param array<int, Filter> $filters */
+    public function filters(array $filters): static
+    {
+        $this->filters = $filters;
+
+        return $this;
+    }
+
+    /** @return array<int, Filter> */
+    public function getFilters(): array
+    {
+        return $this->filters;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function filtersToInertia(): array
+    {
+        return collect($this->filters)->map->toArray()->values()->all();
     }
 }

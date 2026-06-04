@@ -6,6 +6,7 @@ use Illuminate\Validation\Rules\Exists;
 use SaddlePHP\Fields\BelongsTo;
 use Workbench\App\Models\Horse;
 use Workbench\App\Models\Rider;
+use Workbench\App\Saddle\RiderResource;
 
 it('derives the foreign key, label and exists rule from the relation', function () {
     $field = BelongsTo::make('rider');
@@ -55,4 +56,114 @@ it('serializes as a select-field component', function () {
     $field->bound(new Horse);
 
     expect($field->toArray()['component'])->toBe('select-field');
+});
+
+it('applies the options query hook', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    $billie = Rider::factory()->create(['name' => 'Billie']);
+
+    $field = BelongsTo::make('rider')->modifyOptionsQuery(fn ($query) => $query->where('name', 'Billie'));
+    $field->bound(new Horse);
+
+    expect($field->toArray()['options'])->toBe([['value' => $billie->id, 'label' => 'Billie']]);
+});
+
+it('searches options by the resolved title attribute', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    $billie = Rider::factory()->create(['name' => 'Billie']);
+
+    $field = BelongsTo::make('rider');
+    $field->bound(new Horse);
+
+    expect($field->searchOptions('bil'))->toBe([['value' => $billie->id, 'label' => 'Billie']])
+        ->and($field->searchOptions())->toHaveCount(2);
+});
+
+it('caps and hooks searched options', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    Rider::factory()->create(['name' => 'Annie']);
+    Rider::factory()->create(['name' => 'August']);
+
+    $field = BelongsTo::make('rider')->limit(2);
+    $field->bound(new Horse);
+
+    $hooked = BelongsTo::make('rider')->modifyOptionsQuery(fn ($query) => $query->where('name', '!=', 'Amos'));
+    $hooked->bound(new Horse);
+
+    expect($field->searchOptions('a'))->toHaveCount(2)
+        ->and($hooked->searchOptions('a'))->toHaveCount(2)
+        ->and(collect($hooked->searchOptions('a'))->pluck('label')->all())->toBe(['Annie', 'August']);
+});
+
+it('searches by exact key when no title attribute resolves', function () {
+    $amos = Rider::factory()->create(['name' => 'Amos']);
+    Rider::factory()->create(['name' => 'Billie']);
+
+    $original = RiderResource::$title;
+    RiderResource::$title = null;
+
+    try {
+        $field = BelongsTo::make('rider');
+        $field->bound(new Horse);
+
+        expect($field->searchOptions((string) $amos->id))->toBe([
+            ['value' => $amos->id, 'label' => (string) $amos->id],
+        ])->and($field->searchOptions('999'))->toBe([]);
+    } finally {
+        RiderResource::$title = $original;
+    }
+});
+
+it('swaps to the search select component when searchable', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+
+    $field = BelongsTo::make('rider')->searchable();
+    $field->bound(new Horse);
+    $payload = $field->toArray();
+
+    expect($payload['component'])->toBe('search-select-field')
+        ->and($payload['async'])->toBeTrue()
+        ->and($payload['options'])->toBe([]);
+});
+
+it('embeds only the current selection when editing with a searchable field', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    $tex = Rider::factory()->create(['name' => 'Tex']);
+    $horse = Horse::factory()->create(['rider_id' => $tex->id]);
+
+    $field = BelongsTo::make('rider')->searchable();
+    $field->bound(new Horse);
+
+    expect($field->toArray($horse)['options'])->toBe([['value' => $tex->id, 'label' => 'Tex']]);
+});
+
+it('keeps the sync select by default', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+
+    $field = BelongsTo::make('rider');
+    $field->bound(new Horse);
+    $payload = $field->toArray();
+
+    expect($payload['component'])->toBe('select-field')
+        ->and($payload)->not->toHaveKey('async')
+        ->and($payload['options'])->toHaveCount(1);
+});
+
+it('returns no current option when the foreign key is dangling', function () {
+    $tex = Rider::factory()->create(['name' => 'Tex']);
+    $horse = Horse::factory()->create(['rider_id' => $tex->id]);
+    $tex->delete();
+
+    $field = BelongsTo::make('rider')->searchable();
+    $field->bound(new Horse);
+
+    expect($field->toArray($horse)['options'])->toBe([]);
+});
+
+it('restores the sync component when searchable is toggled off', function () {
+    $field = BelongsTo::make('rider')->searchable()->searchable(false);
+    $field->bound(new Horse);
+
+    expect($field->toArray()['component'])->toBe('select-field')
+        ->and($field->toArray())->not->toHaveKey('async');
 });
