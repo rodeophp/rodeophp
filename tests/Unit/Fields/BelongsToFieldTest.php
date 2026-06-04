@@ -56,3 +56,40 @@ it('serializes as a select-field component', function () {
 
     expect($field->toArray()['component'])->toBe('select-field');
 });
+
+it('applies the options query hook', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    $billie = Rider::factory()->create(['name' => 'Billie']);
+
+    $field = BelongsTo::make('rider')->modifyOptionsQuery(fn ($query) => $query->where('name', 'Billie'));
+    $field->bound(new Horse);
+
+    expect($field->toArray()['options'])->toBe([['value' => $billie->id, 'label' => 'Billie']]);
+});
+
+it('searches options by the resolved title attribute', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    $billie = Rider::factory()->create(['name' => 'Billie']);
+
+    $field = BelongsTo::make('rider');
+    $field->bound(new Horse);
+
+    expect($field->searchOptions('bil'))->toBe([['value' => $billie->id, 'label' => 'Billie']])
+        ->and($field->searchOptions())->toHaveCount(2);
+});
+
+it('caps and hooks searched options', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    Rider::factory()->create(['name' => 'Annie']);
+    Rider::factory()->create(['name' => 'August']);
+
+    $field = BelongsTo::make('rider')->limit(2);
+    $field->bound(new Horse);
+
+    $hooked = BelongsTo::make('rider')->modifyOptionsQuery(fn ($query) => $query->where('name', '!=', 'Amos'));
+    $hooked->bound(new Horse);
+
+    expect($field->searchOptions('a'))->toHaveCount(2)
+        ->and($hooked->searchOptions('a'))->toHaveCount(2)
+        ->and(collect($hooked->searchOptions('a'))->pluck('label')->all())->toBe(['Annie', 'August']);
+});

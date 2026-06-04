@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace SaddlePHP\Fields;
 
+use Closure;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo as BelongsToRelation;
 use Illuminate\Support\Str;
@@ -21,6 +24,8 @@ class BelongsTo extends Field
     protected ?string $titleAttribute = null;
 
     protected int $limit = 100;
+
+    protected ?Closure $modifyOptionsQuery = null;
 
     /** @var class-string<Model>|null */
     protected ?string $relatedModel = null;
@@ -46,6 +51,14 @@ class BelongsTo extends Field
     public function limit(int $limit): static
     {
         $this->limit = $limit;
+
+        return $this;
+    }
+
+    /** Hook to scope the related options query (tenancy, visibility, ordering). */
+    public function modifyOptionsQuery(Closure $callback): static
+    {
+        $this->modifyOptionsQuery = $callback;
 
         return $this;
     }
@@ -88,6 +101,23 @@ class BelongsTo extends Field
     }
 
     /** @return array<int, array{value: mixed, label: string}> */
+    public function searchOptions(string $search = ''): array
+    {
+        if ($this->relatedModel === null) {
+            return [];
+        }
+
+        $title = $this->resolveTitleAttribute();
+        $query = $this->optionsQuery($title);
+
+        if ($search !== '') {
+            $query->where($title ?? $this->relatedKeyName, 'like', "%{$search}%");
+        }
+
+        return $this->mapOptions($query->get(), $title);
+    }
+
+    /** @return array<int, array{value: mixed, label: string}> */
     protected function options(): array
     {
         if ($this->relatedModel === null) {
@@ -95,12 +125,27 @@ class BelongsTo extends Field
         }
 
         $title = $this->resolveTitleAttribute();
-        $orderBy = $title ?? $this->relatedKeyName;
 
-        return $this->relatedModel::query()
-            ->orderBy($orderBy)
-            ->limit($this->limit)
-            ->get()
+        return $this->mapOptions($this->optionsQuery($title)->get(), $title);
+    }
+
+    protected function optionsQuery(?string $title): Builder
+    {
+        $query = $this->relatedModel::query()
+            ->orderBy($title ?? $this->relatedKeyName)
+            ->limit($this->limit);
+
+        if ($this->modifyOptionsQuery !== null) {
+            $query = ($this->modifyOptionsQuery)($query) ?? $query;
+        }
+
+        return $query;
+    }
+
+    /** @return array<int, array{value: mixed, label: string}> */
+    protected function mapOptions(Collection $records, ?string $title): array
+    {
+        return $records
             ->map(fn (Model $record) => [
                 'value' => $record->getKey(),
                 'label' => $title !== null
