@@ -25,6 +25,8 @@ class BelongsTo extends Field
 
     protected int $limit = 100;
 
+    protected bool $searchable = false;
+
     protected ?Closure $modifyOptionsQuery = null;
 
     /** @var class-string<Model>|null */
@@ -66,6 +68,40 @@ class BelongsTo extends Field
         return $this;
     }
 
+    public function searchable(bool $searchable = true): static
+    {
+        $this->searchable = $searchable;
+        $this->component = $searchable ? 'search-select-field' : 'select-field';
+
+        return $this;
+    }
+
+    public function toArray(?Model $record = null): array
+    {
+        $payload = parent::toArray($record);
+
+        if ($this->searchable) {
+            $payload['async'] = true;
+            $payload['options'] = $record !== null ? $this->currentOption($record) : [];
+        }
+
+        return $payload;
+    }
+
+    /** @return array<int, array{value: mixed, label: string}> */
+    protected function currentOption(Model $record): array
+    {
+        $key = data_get($record, $this->name);
+
+        if ($key === null || $this->relatedModel === null) {
+            return [];
+        }
+
+        $related = $this->relatedModel::query()->whereKey($key)->first();
+
+        return $related === null ? [] : $this->mapOptions(new Collection([$related]), $this->resolveTitleAttribute());
+    }
+
     public function bound(Model $prototype): void
     {
         if (! method_exists($prototype, $this->relationName)) {
@@ -100,7 +136,7 @@ class BelongsTo extends Field
 
     protected function meta(): array
     {
-        return ['options' => $this->options()];
+        return $this->searchable ? [] : ['options' => $this->options()];
     }
 
     /** @return array<int, array{value: mixed, label: string}> */

@@ -113,3 +113,38 @@ it('searches by exact key when no title attribute resolves', function () {
         RiderResource::$title = $original;
     }
 });
+
+it('swaps to the search select component when searchable', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+
+    $field = BelongsTo::make('rider')->searchable();
+    $field->bound(new Horse);
+    $payload = $field->toArray();
+
+    expect($payload['component'])->toBe('search-select-field')
+        ->and($payload['async'])->toBeTrue()
+        ->and($payload['options'])->toBe([]);
+});
+
+it('embeds only the current selection when editing with a searchable field', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+    $tex = Rider::factory()->create(['name' => 'Tex']);
+    $horse = Horse::factory()->create(['rider_id' => $tex->id]);
+
+    $field = BelongsTo::make('rider')->searchable();
+    $field->bound(new Horse);
+
+    expect($field->toArray($horse)['options'])->toBe([['value' => $tex->id, 'label' => 'Tex']]);
+});
+
+it('keeps the sync select by default', function () {
+    Rider::factory()->create(['name' => 'Amos']);
+
+    $field = BelongsTo::make('rider');
+    $field->bound(new Horse);
+    $payload = $field->toArray();
+
+    expect($payload['component'])->toBe('select-field')
+        ->and($payload)->not->toHaveKey('async')
+        ->and($payload['options'])->toHaveCount(1);
+});
