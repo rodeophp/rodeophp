@@ -6,6 +6,7 @@ namespace Workbench\App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Workbench\Database\Factories\HorseFactory;
 
 class Horse extends Model
@@ -13,11 +14,19 @@ class Horse extends Model
     /** @use HasFactory<HorseFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'breed', 'notes', 'is_saddled'];
+    protected $fillable = ['name', 'breed', 'notes', 'is_saddled', 'rider_id', 'age', 'foaled_on'];
 
     protected function casts(): array
     {
-        return ['is_saddled' => 'boolean'];
+        return [
+            'is_saddled' => 'boolean',
+            'foaled_on' => 'date',
+        ];
+    }
+
+    public function rider(): BelongsTo
+    {
+        return $this->belongsTo(Rider::class);
     }
 
     protected static function newFactory(): HorseFactory

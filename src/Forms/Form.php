@@ -12,6 +12,10 @@ class Form
     /** @var array<int, Field> */
     protected array $fields = [];
 
+    protected ?Model $model = null;
+
+    protected bool $prepared = false;
+
     public static function make(): self
     {
         return new self;
@@ -28,12 +32,41 @@ class Form
     /** @return array<int, Field> */
     public function fields(): array
     {
+        $this->prepare();
+
         return $this->fields;
+    }
+
+    public function model(Model $model): static
+    {
+        $this->model = $model;
+
+        return $this;
+    }
+
+    public function prototype(): ?Model
+    {
+        return $this->model;
+    }
+
+    protected function prepare(): void
+    {
+        if ($this->prepared || $this->model === null) {
+            return;
+        }
+
+        foreach ($this->fields as $field) {
+            $field->bound($this->model);
+        }
+
+        $this->prepared = true;
     }
 
     /** @return array<string, array<int, mixed>> */
     public function rules(): array
     {
+        $this->prepare();
+
         return collect($this->fields)
             ->mapWithKeys(fn (Field $field) => [$field->name() => $field->getRules()])
             ->all();
@@ -42,6 +75,8 @@ class Form
     /** @param array<string, mixed> $validated */
     public function fill(Model $record, array $validated): void
     {
+        $this->prepare();
+
         foreach ($this->fields as $field) {
             if (array_key_exists($field->name(), $validated)) {
                 $field->fill($record, $validated[$field->name()]);
@@ -52,6 +87,8 @@ class Form
     /** @return array<int, array<string, mixed>> */
     public function toInertia(?Model $record = null): array
     {
+        $this->prepare();
+
         return collect($this->fields)
             ->map(fn (Field $field) => $field->toArray($record))
             ->values()->all();

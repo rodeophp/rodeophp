@@ -22,10 +22,18 @@ it('reports sortable and searchable column names', function () {
 
 it('serializes column metadata', function () {
     expect(horseTable()->toInertia())->toBe([
-        ['name' => 'name', 'label' => 'Name', 'sortable' => true],
-        ['name' => 'breed', 'label' => 'Breed', 'sortable' => true],
-        ['name' => 'created_at', 'label' => 'Created At', 'sortable' => false],
+        ['name' => 'name', 'label' => 'Name', 'sortable' => true, 'type' => 'text'],
+        ['name' => 'breed', 'label' => 'Breed', 'sortable' => true, 'type' => 'text'],
+        ['name' => 'created_at', 'label' => 'Created At', 'sortable' => false, 'type' => 'text'],
     ]);
+});
+
+it('formats dates with a custom format', function () {
+    $horse = Horse::factory()->create();
+
+    $cell = TextColumn::make('created_at')->date('M j, Y')->resolve($horse);
+
+    expect($cell)->toBe($horse->created_at->format('M j, Y'));
 });
 
 it('resolves cell values, formatting dates', function () {

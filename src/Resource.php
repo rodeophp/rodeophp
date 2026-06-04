@@ -25,6 +25,9 @@ abstract class Resource
 
     public static ?string $group = null;
 
+    /** @var array<int, string> Relations eager-loaded by the base query. */
+    public static array $with = [];
+
     abstract public static function form(Form $form): Form;
 
     abstract public static function table(Table $table): Table;
@@ -51,7 +54,7 @@ abstract class Resource
 
     public static function query(Request $request): Builder
     {
-        return static::$model::query();
+        return static::$model::query()->with(static::$with);
     }
 
     public static function recordTitle(Model $record): string
@@ -61,7 +64,7 @@ abstract class Resource
 
     public static function makeForm(): Form
     {
-        return static::form(Form::make());
+        return static::form(Form::make()->model(static::newModel()));
     }
 
     public static function makeTable(): Table

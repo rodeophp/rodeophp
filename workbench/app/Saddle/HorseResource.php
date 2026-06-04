@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Workbench\App\Saddle;
 
+use SaddlePHP\Fields\BelongsTo;
+use SaddlePHP\Fields\Date;
+use SaddlePHP\Fields\Number;
 use SaddlePHP\Fields\Select;
 use SaddlePHP\Fields\Text;
 use SaddlePHP\Fields\Textarea;
 use SaddlePHP\Fields\Toggle;
 use SaddlePHP\Forms\Form;
 use SaddlePHP\Resource;
+use SaddlePHP\Tables\Columns\BadgeColumn;
+use SaddlePHP\Tables\Columns\BooleanColumn;
 use SaddlePHP\Tables\Columns\TextColumn;
 use SaddlePHP\Tables\Table;
 use Workbench\App\Models\Horse;
@@ -22,6 +27,8 @@ class HorseResource extends Resource
 
     public static ?string $icon = 'collection';
 
+    public static array $with = ['rider'];
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -33,6 +40,9 @@ class HorseResource extends Resource
             ]),
             Textarea::make('notes')->rows(3),
             Toggle::make('is_saddled'),
+            BelongsTo::make('rider'),
+            Number::make('age')->integer()->min(0)->max(50),
+            Date::make('foaled_on'),
         ]);
     }
 
@@ -40,8 +50,14 @@ class HorseResource extends Resource
     {
         return $table->columns([
             TextColumn::make('name')->sortable()->searchable(),
-            TextColumn::make('breed')->sortable(),
-            TextColumn::make('created_at')->sortable(),
+            BadgeColumn::make('breed')->colors([
+                'quarter' => 'accent',
+                'mustang' => 'ink',
+                'appaloosa' => 'muted',
+            ]),
+            BooleanColumn::make('is_saddled'),
+            TextColumn::make('rider.name')->label('Rider'),
+            TextColumn::make('created_at')->date('M j, Y')->sortable(),
         ]);
     }
 }
