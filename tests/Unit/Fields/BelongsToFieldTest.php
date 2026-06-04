@@ -6,6 +6,7 @@ use Illuminate\Validation\Rules\Exists;
 use SaddlePHP\Fields\BelongsTo;
 use Workbench\App\Models\Horse;
 use Workbench\App\Models\Rider;
+use Workbench\App\Saddle\RiderResource;
 
 it('derives the foreign key, label and exists rule from the relation', function () {
     $field = BelongsTo::make('rider');
@@ -92,4 +93,23 @@ it('caps and hooks searched options', function () {
     expect($field->searchOptions('a'))->toHaveCount(2)
         ->and($hooked->searchOptions('a'))->toHaveCount(2)
         ->and(collect($hooked->searchOptions('a'))->pluck('label')->all())->toBe(['Annie', 'August']);
+});
+
+it('searches by exact key when no title attribute resolves', function () {
+    $amos = Rider::factory()->create(['name' => 'Amos']);
+    Rider::factory()->create(['name' => 'Billie']);
+
+    $original = RiderResource::$title;
+    RiderResource::$title = null;
+
+    try {
+        $field = BelongsTo::make('rider');
+        $field->bound(new Horse);
+
+        expect($field->searchOptions((string) $amos->id))->toBe([
+            ['value' => $amos->id, 'label' => (string) $amos->id],
+        ])->and($field->searchOptions('999'))->toBe([]);
+    } finally {
+        RiderResource::$title = $original;
+    }
 });

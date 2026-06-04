@@ -55,7 +55,10 @@ class BelongsTo extends Field
         return $this;
     }
 
-    /** Hook to scope the related options query (tenancy, visibility, ordering). */
+    /**
+     * Hook to scope the related options query (tenancy, visibility). Runs after
+     * the base ordering and limit, so added orderBy calls become secondary sorts.
+     */
     public function modifyOptionsQuery(Closure $callback): static
     {
         $this->modifyOptionsQuery = $callback;
@@ -111,7 +114,9 @@ class BelongsTo extends Field
         $query = $this->optionsQuery($title);
 
         if ($search !== '') {
-            $query->where($title ?? $this->relatedKeyName, 'like', "%{$search}%");
+            $title !== null
+                ? $query->where($title, 'like', "%{$search}%")
+                : $query->whereKey($search);
         }
 
         return $this->mapOptions($query->get(), $title);
