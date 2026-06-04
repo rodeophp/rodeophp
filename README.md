@@ -36,6 +36,7 @@ declare(strict_types=1);
 
 namespace App\Saddle;
 
+use App\Models\Horse;
 use SaddlePHP\Fields\BelongsTo;
 use SaddlePHP\Fields\Date;
 use SaddlePHP\Fields\Number;
@@ -49,7 +50,6 @@ use SaddlePHP\Tables\Columns\BadgeColumn;
 use SaddlePHP\Tables\Columns\BooleanColumn;
 use SaddlePHP\Tables\Columns\TextColumn;
 use SaddlePHP\Tables\Table;
-use App\Models\Horse;
 
 class HorseResource extends Resource
 {
@@ -105,7 +105,7 @@ Resources are discovered automatically by scanning `app/Saddle/` at boot — no 
 | `Textarea` | Multi-line text input. Modifiers: `rows(int)`. |
 | `Select` | Fixed-options dropdown. Pass an associative array to `options(['value' => 'Label'])`. |
 | `Toggle` | Boolean switch. Stores `true`/`false`. |
-| `BelongsTo` | Relation select. The argument is the Eloquent relation method name on the model (`BelongsTo::make('rider')` reads `$model->rider()` and submits the foreign key). Option labels resolve from `titleAttribute('name')`, falling back to the related model's registered resource `$title`, then its key. Options are capped at 100 by default; override with `limit(int)`. Async/searchable selects are planned. |
+| `BelongsTo` | Relation select. The argument is the Eloquent relation method name on the model (`BelongsTo::make('rider')` reads `$model->rider()` and submits the foreign key). Option labels resolve from `titleAttribute('name')`, falling back to the related model's registered resource `$title`, then its key. If neither a `titleAttribute()` nor a registered resource is available, options are labeled by primary key, so set `titleAttribute('name')` for readable labels. Options are capped at 100 by default; override with `limit(int)`. Async/searchable selects are planned. |
 | `Number` | Numeric input. Modifiers: `min()`, `max()`, `step()`, `integer()`. |
 | `Date` | Date input. Values render as `Y-m-d`. |
 
