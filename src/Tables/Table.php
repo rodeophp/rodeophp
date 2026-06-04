@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace SaddlePHP\Tables;
 
-use SaddlePHP\Tables\Columns\TextColumn;
+use SaddlePHP\Tables\Columns\Column;
 
 class Table
 {
-    /** @var array<int, TextColumn> */
+    /** @var array<int, Column> */
     protected array $columns = [];
 
     public static function make(): self
@@ -16,7 +16,7 @@ class Table
         return new self;
     }
 
-    /** @param array<int, TextColumn> $columns */
+    /** @param array<int, Column> $columns */
     public function columns(array $columns): static
     {
         $this->columns = $columns;
@@ -24,7 +24,7 @@ class Table
         return $this;
     }
 
-    /** @return array<int, TextColumn> */
+    /** @return array<int, Column> */
     public function getColumns(): array
     {
         return $this->columns;
@@ -42,7 +42,7 @@ class Table
         return collect($this->columns)->filter->isSearchable()->map->name()->values()->all();
     }
 
-    /** @return array<int, array{name: string, label: string, sortable: bool}> */
+    /** @return array<int, array<string, mixed>> */
     public function toInertia(): array
     {
         return collect($this->columns)->map->toArray()->values()->all();
