@@ -32,6 +32,8 @@ class Form
     /** @return array<int, Field> */
     public function fields(): array
     {
+        $this->prepare();
+
         return $this->fields;
     }
 
