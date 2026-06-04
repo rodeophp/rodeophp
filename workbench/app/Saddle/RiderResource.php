@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Workbench\App\Saddle;
+
+use SaddlePHP\Fields\Text;
+use SaddlePHP\Forms\Form;
+use SaddlePHP\Resource;
+use SaddlePHP\Tables\Columns\TextColumn;
+use SaddlePHP\Tables\Table;
+use Workbench\App\Models\Rider;
+
+class RiderResource extends Resource
+{
+    public static string $model = Rider::class;
+
+    public static ?string $title = 'name';
+
+    public static function form(Form $form): Form
+    {
+        return $form->schema([
+            Text::make('name')->required(),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table->columns([
+            TextColumn::make('name')->sortable()->searchable(),
+        ]);
+    }
+}

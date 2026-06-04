@@ -11,6 +11,7 @@ use Orchestra\Testbench\TestCase as Orchestra;
 use SaddlePHP\Saddle;
 use Workbench\App\Models\User;
 use Workbench\App\Saddle\HorseResource;
+use Workbench\App\Saddle\RiderResource;
 
 abstract class TestCase extends Orchestra
 {
@@ -21,7 +22,7 @@ abstract class TestCase extends Orchestra
     {
         parent::setUp();
 
-        $this->app->make(Saddle::class)->register([HorseResource::class]);
+        $this->app->make(Saddle::class)->register([HorseResource::class, RiderResource::class]);
 
         Gate::guessPolicyNamesUsing(fn () => null);
     }
