@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="art/logo.png" alt="SaddlePHP" width="320"><br>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="art/logo-dark.png">
+    <img src="art/logo.png" alt="SaddlePHP" width="340">
+  </picture>
+  <br>
   <em>Saddle up cowboy, there's a new admin panel in town.</em>
 </p>
 
