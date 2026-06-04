@@ -9,6 +9,7 @@ const props = defineProps({
     columns: Array,
     rows: Object,
     query: Object,
+    filters: Array,
 });
 
 const { saddle } = usePage().props;
@@ -29,6 +30,13 @@ function sortBy(column) {
     if (!column.sortable) return;
     const direction = props.query.sort === column.name && props.query.direction === 'asc' ? 'desc' : 'asc';
     router.get(base, { ...props.query, sort: column.name, direction }, { preserveState: true, replace: true });
+}
+
+function setFilter(name, value) {
+    const filter = { ...props.query.filter };
+    if (value === '') delete filter[name];
+    else filter[name] = value;
+    router.get(base, { ...props.query, filter, page: 1 }, { preserveState: true, replace: true });
 }
 
 const deleting = ref(null);
@@ -64,6 +72,26 @@ function badgeClass(column, value) {
             placeholder="Search&#x2026;"
             class="mt-5 w-full max-w-xs rounded-lg border border-line-2 bg-bg px-3 py-2 text-sm"
         />
+
+        <div v-if="filters.length" class="mt-3 flex flex-wrap items-center gap-3">
+            <label v-for="filter in filters" :key="filter.name" class="flex items-center gap-2 text-xs text-ink-2">
+                {{ filter.label }}
+                <select
+                    :value="query.filter?.[filter.name] ?? ''"
+                    class="rounded-lg border border-line-2 bg-bg px-2 py-1.5 text-sm text-ink"
+                    @change="setFilter(filter.name, $event.target.value)"
+                >
+                    <option value="">All</option>
+                    <template v-if="filter.type === 'boolean'">
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </template>
+                    <template v-else>
+                        <option v-for="option in filter.options" :key="option.value" :value="option.value">{{ option.label }}</option>
+                    </template>
+                </select>
+            </label>
+        </div>
 
         <div class="mt-4 overflow-hidden rounded-xl border border-line bg-bg">
             <table class="w-full text-left text-sm">

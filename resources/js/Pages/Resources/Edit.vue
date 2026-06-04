@@ -1,4 +1,5 @@
 <script setup>
+import { provide } from 'vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import PanelLayout from '../../Components/PanelLayout.vue';
 import FormRenderer from '../../Components/FormRenderer.vue';
@@ -7,6 +8,8 @@ const props = defineProps({ resource: Object, record: Object, fields: Array });
 
 const { saddle } = usePage().props;
 const base = `/${saddle.path}/resources/${props.resource.uriKey}`;
+
+provide('saddleOptionsBase', `${base}/options`);
 
 const form = useForm(Object.fromEntries(props.fields.map((field) => [field.name, field.value])));
 </script>
