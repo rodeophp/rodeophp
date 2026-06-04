@@ -130,4 +130,13 @@ abstract class Field
     {
         return [];
     }
+
+    /**
+     * Hook invoked with the owning resource's model prototype before the
+     * form is consumed. Lets relation-aware fields derive their metadata.
+     */
+    public function bound(Model $prototype): void
+    {
+        //
+    }
 }

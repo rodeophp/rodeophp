@@ -61,7 +61,7 @@ abstract class Resource
 
     public static function makeForm(): Form
     {
-        return static::form(Form::make());
+        return static::form(Form::make()->model(static::newModel()));
     }
 
     public static function makeTable(): Table
