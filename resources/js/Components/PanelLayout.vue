@@ -11,7 +11,7 @@ const base = computed(() => `/${saddle.value.path}`);
     <div class="flex min-h-screen">
         <aside class="flex w-60 shrink-0 flex-col border-r border-line bg-bg">
             <Link :href="base" class="flex items-center gap-2.5 border-b border-line px-5 py-4">
-                <span class="grid h-7 w-7 place-items-center rounded-lg bg-ink text-xs font-bold text-white">R</span>
+                <img :src="'/vendor/saddle/icon.png'" alt="" class="h-7 w-7 shrink-0 rounded-lg" />
                 <span class="font-semibold tracking-tight">{{ saddle.name }}</span>
             </Link>
             <nav class="flex-1 p-3">

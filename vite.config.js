@@ -8,6 +8,7 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 export default defineConfig({
     plugins: [vue(), tailwindcss()],
     base: '/vendor/saddle/',
+    publicDir: 'resources/static',
     define: {
         __SADDLE_VERSION__: JSON.stringify(pkg.version),
     },

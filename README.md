@@ -1,5 +1,5 @@
 <p align="center">
-  <strong>SaddlePHP</strong><br>
+  <img src="art/logo.png" alt="SaddlePHP" width="320"><br>
   <em>Saddle up cowboy, there's a new admin panel in town.</em>
 </p>
 
