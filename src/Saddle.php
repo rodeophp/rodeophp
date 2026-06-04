@@ -66,6 +66,7 @@ class Saddle
     public function nav(Request $request): array
     {
         return $this->resources()
+            ->filter(fn (string $resource) => $resource::allows('viewAny'))
             ->groupBy(fn (string $resource) => $resource::$group ?? '')
             ->map(fn (Collection $resources, string $group) => [
                 'group' => $group === '' ? null : $group,
