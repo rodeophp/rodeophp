@@ -38,7 +38,11 @@ abstract class TestCase extends Orchestra
         $app['config']->set('inertia.testing.ensure_pages_exist', false);
     }
 
-    /** @param array<string, mixed> $attributes */
+    /**
+     * @param array<string, mixed> $attributes
+     *
+     * Default user is privileged (is_admin => true); tests exercising gates must opt out explicitly via ['is_admin' => false].
+     */
     protected function actingAsUser(array $attributes = []): User
     {
         $user = User::factory()->create(array_merge(['is_admin' => true], $attributes));

@@ -48,7 +48,20 @@ it('refuses hidden-field updates from non-admins', function () {
     $this->actingAsUser(['is_admin' => false]);
     $horse = Horse::factory()->create(['name' => 'Cisco', 'notes' => 'original']);
 
-    $this->put("/admin/resources/horses/{$horse->id}", ['name' => 'Cisco', 'notes' => 'smuggled']);
+    $this->put("/admin/resources/horses/{$horse->id}", ['name' => 'Cisco', 'notes' => 'smuggled'])
+        ->assertRedirect('/admin/resources/horses');
 
     expect($horse->fresh()->notes)->toBe('original');
+});
+
+it('hides gated field values on the edit form from non-admins', function () {
+    $this->actingAsUser(['is_admin' => false]);
+    $horse = Horse::factory()->create(['notes' => 'secret']);
+
+    $this->get("/admin/resources/horses/{$horse->id}/edit")
+        ->assertOk()
+        ->assertDontSee('secret')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('fields', fn ($fields) => ! collect($fields)->pluck('name')->contains('notes'))
+        );
 });
