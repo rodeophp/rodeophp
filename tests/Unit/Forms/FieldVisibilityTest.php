@@ -54,7 +54,7 @@ it('passes the request to the callback', function () {
     $field = Text::make('name')->canSee(fn ($request) => $request->query('show') === 'yes');
 
     $requestYes = Request::create('/x', 'GET', ['show' => 'yes']);
-    $requestNo  = Request::create('/x', 'GET', []);
+    $requestNo = Request::create('/x', 'GET', []);
 
     expect($field->visibleTo($requestYes))->toBeTrue()
         ->and($field->visibleTo($requestNo))->toBeFalse();

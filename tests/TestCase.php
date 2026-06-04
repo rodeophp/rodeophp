@@ -39,7 +39,7 @@ abstract class TestCase extends Orchestra
     }
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      *
      * Default user is privileged (is_admin => true); tests exercising gates must opt out explicitly via ['is_admin' => false].
      */
