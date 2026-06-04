@@ -97,6 +97,8 @@ class BelongsTo extends Field
             return [];
         }
 
+        // Deliberately bypasses modifyOptionsQuery: a persisted FK must keep
+        // rendering its label even when the row falls outside the hook's scope.
         $related = $this->relatedModel::query()->whereKey($key)->first();
 
         return $related === null ? [] : $this->mapOptions(new Collection([$related]), $this->resolveTitleAttribute());

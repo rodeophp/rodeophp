@@ -6,12 +6,14 @@ use SaddlePHP\Http\Controllers\ResourceCreateController;
 use SaddlePHP\Http\Controllers\ResourceDestroyController;
 use SaddlePHP\Http\Controllers\ResourceEditController;
 use SaddlePHP\Http\Controllers\ResourceIndexController;
+use SaddlePHP\Http\Controllers\ResourceOptionsController;
 use SaddlePHP\Http\Controllers\ResourceStoreController;
 use SaddlePHP\Http\Controllers\ResourceUpdateController;
 
 Route::get('/', DashboardController::class)->name('dashboard');
 
 Route::get('/resources/{resourceKey}', ResourceIndexController::class)->name('resources.index');
+Route::get('/resources/{resourceKey}/options/{field}', ResourceOptionsController::class)->name('resources.options');
 Route::get('/resources/{resourceKey}/create', ResourceCreateController::class)->name('resources.create');
 Route::post('/resources/{resourceKey}', ResourceStoreController::class)->name('resources.store');
 Route::get('/resources/{resourceKey}/{record}/edit', ResourceEditController::class)->name('resources.edit');

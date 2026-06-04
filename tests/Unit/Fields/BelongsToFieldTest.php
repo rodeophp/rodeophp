@@ -148,3 +148,22 @@ it('keeps the sync select by default', function () {
         ->and($payload)->not->toHaveKey('async')
         ->and($payload['options'])->toHaveCount(1);
 });
+
+it('returns no current option when the foreign key is dangling', function () {
+    $tex = Rider::factory()->create(['name' => 'Tex']);
+    $horse = Horse::factory()->create(['rider_id' => $tex->id]);
+    $tex->delete();
+
+    $field = BelongsTo::make('rider')->searchable();
+    $field->bound(new Horse);
+
+    expect($field->toArray($horse)['options'])->toBe([]);
+});
+
+it('restores the sync component when searchable is toggled off', function () {
+    $field = BelongsTo::make('rider')->searchable()->searchable(false);
+    $field->bound(new Horse);
+
+    expect($field->toArray()['component'])->toBe('select-field')
+        ->and($field->toArray())->not->toHaveKey('async');
+});
