@@ -178,11 +178,33 @@ class BelongsTo extends Field
             ->orderBy($title ?? $this->relatedKeyName)
             ->limit($this->limit);
 
+        $this->scopeToTenant($query);
+
         if ($this->modifyOptionsQuery !== null) {
             $query = ($this->modifyOptionsQuery)($query) ?? $query;
         }
 
         return $query;
+    }
+
+    /**
+     * Scope the options to the bound tenant when the related model's registered
+     * resource is tenant-scoped. Runs before modifyOptionsQuery so the developer
+     * hook composes on top of an already-secured query.
+     */
+    protected function scopeToTenant(Builder $query): void
+    {
+        $tenant = app(Saddle::class)->tenant();
+
+        if ($tenant === null) {
+            return;
+        }
+
+        $resource = $this->relatedResource();
+
+        if ($resource !== null && $resource::$tenant !== null) {
+            $query->whereBelongsTo($tenant, $resource::$tenant);
+        }
     }
 
     /** @return array<int, array{value: mixed, label: string}> */

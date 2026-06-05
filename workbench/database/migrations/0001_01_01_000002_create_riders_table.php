@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('riders', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->foreignId('ranch_id')->nullable();
             $table->timestamps();
         });
     }

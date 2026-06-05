@@ -14,7 +14,7 @@ class Horse extends Model
     /** @use HasFactory<HorseFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'breed', 'notes', 'is_saddled', 'rider_id', 'age', 'foaled_on'];
+    protected $fillable = ['name', 'breed', 'notes', 'is_saddled', 'rider_id', 'ranch_id', 'age', 'foaled_on'];
 
     protected function casts(): array
     {
@@ -27,6 +27,11 @@ class Horse extends Model
     public function rider(): BelongsTo
     {
         return $this->belongsTo(Rider::class);
+    }
+
+    public function ranch(): BelongsTo
+    {
+        return $this->belongsTo(Ranch::class);
     }
 
     protected static function newFactory(): HorseFactory
