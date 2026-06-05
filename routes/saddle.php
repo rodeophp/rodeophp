@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use SaddlePHP\Http\Controllers\DashboardController;
+use SaddlePHP\Http\Controllers\ResourceActionController;
 use SaddlePHP\Http\Controllers\ResourceCreateController;
 use SaddlePHP\Http\Controllers\ResourceDestroyController;
 use SaddlePHP\Http\Controllers\ResourceEditController;
@@ -20,6 +21,7 @@ $recordKey = '^(?!create$|options$|actions$).+$';
 
 Route::get('/resources/{resourceKey}', ResourceIndexController::class)->name('resources.index');
 Route::get('/resources/{resourceKey}/options/{field}', ResourceOptionsController::class)->name('resources.options');
+Route::post('/resources/{resourceKey}/actions/{action}', ResourceActionController::class)->name('resources.actions.run');
 Route::get('/resources/{resourceKey}/create', ResourceCreateController::class)->name('resources.create');
 Route::post('/resources/{resourceKey}', ResourceStoreController::class)->name('resources.store');
 Route::get('/resources/{resourceKey}/{record}/edit', ResourceEditController::class)->name('resources.edit')->where('record', $recordKey);
