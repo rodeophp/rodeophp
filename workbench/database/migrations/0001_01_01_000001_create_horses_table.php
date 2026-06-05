@@ -15,6 +15,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->boolean('is_saddled')->default(false);
             $table->foreignId('rider_id')->nullable();
+            $table->foreignId('ranch_id')->nullable();
             $table->integer('age')->nullable();
             $table->date('foaled_on')->nullable();
             $table->timestamps();
