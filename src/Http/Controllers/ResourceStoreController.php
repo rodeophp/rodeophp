@@ -29,8 +29,9 @@ class ResourceStoreController extends Controller
 
         $record->save();
 
-        return redirect()
-            ->route('saddle.resources.index', $resource::uriKey())
+        $indexUrl = '/'.app(Saddle::class)->path().'/resources/'.$resource::uriKey();
+
+        return redirect()->to($indexUrl)
             ->with('success', $resource::singularLabel().' created.');
     }
 }

@@ -6,6 +6,7 @@ namespace SaddlePHP\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use SaddlePHP\Saddle;
 
 class ResourceUpdateController extends Controller
 {
@@ -21,8 +22,9 @@ class ResourceUpdateController extends Controller
         $form->fill($model, $validated);
         $model->save();
 
-        return redirect()
-            ->route('saddle.resources.index', $resource::uriKey())
+        $indexUrl = '/'.app(Saddle::class)->path().'/resources/'.$resource::uriKey();
+
+        return redirect()->to($indexUrl)
             ->with('success', $resource::singularLabel().' updated.');
     }
 }
