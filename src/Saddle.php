@@ -130,6 +130,16 @@ class Saddle
         return $this->tenant;
     }
 
+    /**
+     * Drop the bound tenant. On long-lived servers (Octane) the container
+     * singleton survives across requests, so the tenant must be reset between
+     * them or one request's tenant would leak into the next.
+     */
+    public function forgetTenant(): void
+    {
+        $this->tenant = null;
+    }
+
     /** @return array<int, array{group: string|null, items: array<int, array<string, mixed>>}> */
     public function nav(Request $request): array
     {
