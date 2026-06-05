@@ -18,4 +18,17 @@ return [
         'name' => 'Saddle',
         'accent' => '#d9501f',
     ],
+
+    /*
+     * Opt-in multi-tenancy. Set 'model' to an Eloquent class to mount the
+     * panel under /{path}/{tenant} and scope every data path to the resolved
+     * tenant. 'relationship' is the tenant-side relation listing its members
+     * (used for the membership check). null disables tenancy entirely, leaving
+     * v0.5 behavior byte-identical. Changing this requires `php artisan
+     * route:clear` because the {tenant} prefix is decided at boot.
+     */
+    'tenancy' => [
+        'model' => null,
+        'relationship' => 'users',
+    ],
 ];

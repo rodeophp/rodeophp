@@ -10,6 +10,7 @@ use SaddlePHP\Console\InstallCommand;
 use SaddlePHP\Console\ResourceMakeCommand;
 use SaddlePHP\Console\UpgradeCommand;
 use SaddlePHP\Http\Middleware\HandleSaddleRequests;
+use SaddlePHP\Http\Middleware\ResolveSaddleTenant;
 
 class SaddleServiceProvider extends ServiceProvider
 {
@@ -50,11 +51,23 @@ class SaddleServiceProvider extends ServiceProvider
             return;
         }
 
-        Route::prefix(config('saddle.path', 'admin'))
-            ->middleware([
-                ...config('saddle.middleware', ['web', 'auth']),
-                HandleSaddleRequests::class,
-            ])
+        $tenancyOn = config('saddle.tenancy.model') !== null;
+
+        $prefix = config('saddle.path', 'admin');
+        $middleware = config('saddle.middleware', ['web', 'auth']);
+
+        if ($tenancyOn) {
+            $prefix .= '/{tenant}';
+            // ResolveSaddleTenant binds the tenant before HandleSaddleRequests
+            // shares props that depend on it, and enforces membership (403)
+            // before anything renders.
+            $middleware[] = ResolveSaddleTenant::class;
+        }
+
+        $middleware[] = HandleSaddleRequests::class;
+
+        Route::prefix($prefix)
+            ->middleware($middleware)
             ->name('saddle.')
             ->group(__DIR__.'/../routes/saddle.php');
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SaddlePHP;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use SaddlePHP\Support\ResourceDiscovery;
@@ -23,6 +24,9 @@ class Saddle
 
     /** @var array<int, string> */
     protected array $styles = [];
+
+    /** The tenant resolved for the current request, or null when tenancy is off. */
+    protected ?Model $tenant = null;
 
     /** Queue a plugin script for the panel shell. Developer-supplied URLs only. */
     public function script(string $url): static
@@ -97,7 +101,33 @@ class Saddle
 
     public function path(): string
     {
-        return trim((string) config('saddle.path', 'admin'), '/');
+        $path = trim((string) config('saddle.path', 'admin'), '/');
+
+        if ($this->tenant !== null) {
+            return $path.'/'.$this->tenant->getRouteKey();
+        }
+
+        return $path;
+    }
+
+    /** The configured tenant model class, or null when tenancy is disabled. */
+    public function tenancyModel(): ?string
+    {
+        return config('saddle.tenancy.model');
+    }
+
+    /** Bind the tenant resolved for the current request. */
+    public function useTenant(Model $tenant): static
+    {
+        $this->tenant = $tenant;
+
+        return $this;
+    }
+
+    /** The tenant bound for the current request, or null when tenancy is off. */
+    public function tenant(): ?Model
+    {
+        return $this->tenant;
     }
 
     /** @return array<int, array{group: string|null, items: array<int, array<string, mixed>>}> */

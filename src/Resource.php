@@ -28,6 +28,13 @@ abstract class Resource
     /** @var array<int, string> Relations eager-loaded by the base query. */
     public static array $with = [];
 
+    /**
+     * The record's BelongsTo relationship to the tenant. When set AND tenancy
+     * is active, every query for this resource is scoped to the bound tenant.
+     * null = the resource is shared/global (unscoped) by design.
+     */
+    public static ?string $tenant = null;
+
     abstract public static function form(Form $form): Form;
 
     abstract public static function table(Table $table): Table;
@@ -54,7 +61,15 @@ abstract class Resource
 
     public static function query(Request $request): Builder
     {
-        return static::$model::query()->with(static::$with);
+        $query = static::$model::query()->with(static::$with);
+
+        $tenant = app(Saddle::class)->tenant();
+
+        if (static::$tenant !== null && $tenant !== null) {
+            $query->whereBelongsTo($tenant, static::$tenant);
+        }
+
+        return $query;
     }
 
     public static function recordTitle(Model $record): string
