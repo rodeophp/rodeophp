@@ -5,6 +5,11 @@ import { Link, usePage } from '@inertiajs/vue3';
 const page = usePage();
 const saddle = computed(() => page.props.saddle);
 const base = computed(() => `/${saddle.value.path}`);
+
+function switchTenant(event) {
+    const base = saddle.value.path.split('/').slice(0, -1).join('/');
+    window.location.href = '/' + base + '/' + event.target.value;
+}
 </script>
 
 <template>
@@ -14,6 +19,16 @@ const base = computed(() => `/${saddle.value.path}`);
                 <img :src="'/vendor/saddle/icon.png'" alt="" class="h-7 w-7 shrink-0 rounded-lg" />
                 <span class="font-semibold tracking-tight">{{ saddle.name }}</span>
             </Link>
+            <div v-if="saddle.tenants?.length > 1" class="border-b border-line px-3 py-2">
+                <select
+                    :value="saddle.tenant.key"
+                    aria-label="Switch tenant"
+                    class="w-full rounded-lg border border-line-2 bg-bg px-3 py-1.5 text-sm"
+                    @change="switchTenant"
+                >
+                    <option v-for="t in saddle.tenants" :key="t.key" :value="t.key">{{ t.label }}</option>
+                </select>
+            </div>
             <nav class="flex-1 p-3">
                 <div v-for="(group, gi) in saddle.nav" :key="gi" class="mb-4">
                     <p v-if="group.group" class="px-2 pb-1 text-[0.65rem] font-medium uppercase tracking-wide text-ink-3">{{ group.group }}</p>
