@@ -32,6 +32,15 @@ it('lets a member reach their ranch and see only its horses', function () {
         );
 });
 
+it('redirects guests to login before any tenant logic runs', function () {
+    $ranch = Ranch::factory()->create(['name' => 'Dusty Creek Ranch']);
+
+    // Both real and unknown tenant keys must look identical to a guest, so
+    // tenant existence cannot be probed without authenticating first.
+    $this->get("/admin/{$ranch->getRouteKey()}/resources/horses")->assertRedirect();
+    $this->get('/admin/999999/resources/horses')->assertRedirect();
+});
+
 it('forbids a non-member with 403', function () {
     $this->actingAsUser();
     $ranch = Ranch::factory()->create(['name' => 'Foreign Ranch']);
