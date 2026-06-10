@@ -19,6 +19,7 @@ Route::get('/', DashboardController::class)->name('dashboard');
 // ever changes.
 $recordKey = '^(?!create$|options$|actions$).+$';
 
+// standard routes for resources
 Route::get('/resources/{resourceKey}', ResourceIndexController::class)->name('resources.index');
 Route::get('/resources/{resourceKey}/options/{field}', ResourceOptionsController::class)->name('resources.options');
 Route::post('/resources/{resourceKey}/actions/{action}', ResourceActionController::class)->name('resources.actions.run');
